@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 const scene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 //camera positions
-camera.position.z = 50;
-camera.position.y = 10;
+camera.position.z = 60;
+camera.position.y = 30;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -26,11 +27,10 @@ const textureLoader = new THREE.TextureLoader();
 const bg_texture = new THREE.TextureLoader().load('images/stars_milky_way.jpg');
 const sun_texture = new THREE.TextureLoader().load('images/sunmap.jpg');
 const saturn_texture = new THREE.TextureLoader().load('images/saturnmap.jpg');
-const ring_texture = new THREE.TextureLoader().load("https://i.postimg.cc/zz7Gr430/saturn-rings-top.png");
+const ring_texture = new THREE.TextureLoader().load("images/saturn-rings-top.png");
 const enceladus_texture = new THREE.TextureLoader().load('images/enceladus.jpg');
 const mimas_texture = new THREE.TextureLoader().load('images/mimas.jpg');
 const asteroid_texture = new THREE.TextureLoader().load('images/asteroid.jpg');
-
 
 //sunlight
 const sunlight = new THREE.DirectionalLight(0xffffff, 1);
@@ -43,21 +43,20 @@ const bg_material = new THREE.MeshBasicMaterial({ map: bg_texture, side: THREE.D
 const bg_sphere = new THREE.Mesh(bg_geometry, bg_material);
 scene.add(bg_sphere);
 
-//sun
+// sun
 const sun_geometry = new THREE.SphereGeometry(5, 32, 32);
 const sun_material = new THREE.MeshBasicMaterial({ map:sun_texture });
 const sun = new THREE.Mesh(sun_geometry, sun_material);
-// sun.position.set(40, 10, 10);
 sun.position.copy(sunlight.position);
 scene.add(sun);
 
-//saturn
+// saturn
 const saturn_geometry = new THREE.SphereGeometry(15, 32, 100);
-const saturn_material = new THREE.MeshStandardMaterial({ map: saturn_texture });
+const saturn_material = new THREE.MeshStandardMaterial({ map: saturn_texture});
 const saturn_sphere = new THREE.Mesh(saturn_geometry, saturn_material);
 scene.add(saturn_sphere);
 
-//ring
+// ring
 const ring_geometry  = new THREE.RingGeometry(23, 32, 100); 
 const pos = ring_geometry .attributes.position;
 const v3 = new THREE.Vector3();
@@ -78,13 +77,13 @@ const ring_material = new THREE.MeshBasicMaterial({
 const ring= new THREE.Mesh(ring_geometry, ring_material);
 scene.add(ring);
 
-//ring and saturn position
+// ring and saturn position
 ring.position.x = 2;
 ring.position.y = 6;
 saturn_sphere.position.x = 2;
 saturn_sphere.position.y = 6;
 
-//ring angle
+// ring angle
 ring.rotation.x = Math.PI / 2;
 
 // enceladus moon
@@ -101,24 +100,57 @@ const mimas = new THREE.Mesh(mimas_geometry, mimas_material);
 const mimasOrbitRadius = 20;
 scene.add(mimas);
 
+// particle system
+const particleCount = 10000; // Number of particles
+const particles = new Float32Array(particleCount * 3); // Array to hold particle positions
 
-//random asteroids
-const numAsteroids = 5; //number of asteroids
+for (let i = 0; i < particleCount * 3; i += 3) {
+  const radius = 200; // Radius of the background sphere
+  const theta = Math.random() * Math.PI * 2; // Random angle around the sphere
+  const phi = Math.acos(2 * Math.random() - 1); // Random angle from pole to equator
+
+  particles[i] = radius * Math.sin(phi) * Math.cos(theta); // x position
+  particles[i + 1] = radius * Math.sin(phi) * Math.sin(theta); // y position
+  particles[i + 2] = radius * Math.cos(phi); // z position
+}
+
+const geometry = new THREE.BufferGeometry();
+geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+
+const material = new THREE.PointsMaterial({ size: 0.01, color: 0xffffff, transparent: true });
+
+const particleSystem = new THREE.Points(geometry, material);
+scene.add(particleSystem);
+
+// Random Asteroids
+const numAsteroids = 50; // Number of asteroids
 const asteroids = [];
 const asteroidMovements = [];
 
 for (let i = 0; i < numAsteroids; i++) {
-  const asteroidSize = Math.random() * 0.5 + 0.5;
+  const asteroidSize = Math.random() * 4 + 0.5;
   const asteroidGeometry = new THREE.DodecahedronGeometry(asteroidSize, 0);
-  const asteroidMaterial = new THREE.MeshBasicMaterial({ map:asteroid_texture});
+  const asteroidMaterial = new THREE.MeshBasicMaterial({ map: asteroid_texture });
 
   const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
-  asteroid.position.set((Math.random()-0.5) * 40,(Math.random()-0.5) * 40,(Math.random()-0.5) * 40);
-
+  
+  const radius = 200; // Radius of the background sphere
+  const theta = Math.random() * Math.PI * 2; // Random angle around the sphere
+  const phi = Math.acos(2 * Math.random() - 1); // Random angle from pole to equator
+  
+  asteroid.position.x = radius * Math.sin(phi) * Math.cos(theta);
+  asteroid.position.y = radius * Math.sin(phi) * Math.sin(theta);
+  asteroid.position.z = radius * Math.cos(phi);
+  
   asteroids.push(asteroid);
   scene.add(asteroid);
+  
+  asteroidMovements.push({
+    x: (Math.random() - 0.5) * 0.1,
+    y: (Math.random() - 0.5) * 0.1,
+    z: (Math.random() - 0.5) * 0.1,
+  });
 
-  asteroidMovements.push({x: (Math.random() - 0.5) * 0.1,y: (Math.random() - 0.5) * 0.1,z: (Math.random() - 0.5) * 0.1,});
   asteroid.receiveShadow = true;
   asteroid.castShadow = true;
 }
@@ -131,7 +163,6 @@ mimas.castShadow = true;
 ring.castShadow = true;
 saturn_sphere.castShadow = true;
 
-bg_sphere.receiveShadow = true;
 enceladus.receiveShadow = true;
 mimas.receiveShadow = true;
 ring.receiveShadow = true;
@@ -159,6 +190,27 @@ saturn_sphere.receiveShadow = true;
 let enceladusAngle = 0;
 let mimasAngle = Math.PI / 2;
 
+//spaceship
+var loader = new GLTFLoader();
+loader.load(
+    './Intergalactic_Spaceships_Version_2/GLTF_SEPARATE/Intergalactic_Spaceships_Version_2.gltf',
+    function (gltf) {
+
+      var scaleFactor = 0.5; // Adjust this value to decrease the size
+      gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
+      scene.add(gltf.scene);
+      gltf.scene.position.set(10,20,40);
+      gltf.scene.rotation.set(0, Math.PI / 2, 0);
+      gltf.scene.castShadow = true;
+    },
+    function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    function (error) {
+        console.error('An error occurred:', error);
+    }
+);
+
 function animate() {
   requestAnimationFrame(animate);
   controls.update()
@@ -179,8 +231,7 @@ function animate() {
   saturn_sphere.rotation.y += 0.01;
   enceladus.rotation.y += 0.1;
   mimas.rotation.y += 0.1;
-  ring.rotation.z +=1;
-
+  scene.rotation.y -= 0.001;
 
   asteroids.forEach((asteroid, index) => {
     // Accumulate movement deltas for each asteroid
@@ -203,6 +254,6 @@ function animate() {
     }
   });
 
-  renderer.render(scene, camera);
+    renderer.render(scene, camera);
 }
 animate();
