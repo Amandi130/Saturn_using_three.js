@@ -1,6 +1,7 @@
 # Saturn_using_three.js
 
-![sturn](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/ecc22d3b-0b27-4b3e-9f61-3ca1c6bd2561)
+![saturn_new](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/ca6fb456-ee05-492b-aa14-55931682b07a)
+
 
 # three.js
 npm install --save three
