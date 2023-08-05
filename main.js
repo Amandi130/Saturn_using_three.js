@@ -14,6 +14,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const ambient = new THREE.AmbientLight(0x222222);
+ambient.position.set(0,0,0);
 scene.add(ambient);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -22,14 +23,13 @@ controls.dampingFactor = 0.05;
 
 const textureLoader = new THREE.TextureLoader();
 
-const bg_texture = textureLoader.load('images/stars_milky_way.jpg');
-const sun_texture = textureLoader.load('images/sunmap.jpg');
-const saturn_texture = textureLoader.load('images/saturnmap.jpg');
-const ring_texture = textureLoader.load('images/saturnringpattern.gif');
-const ring_normal_map = textureLoader.load('images/saturnringpattern.jpg');
-const enceladus_texture = textureLoader.load('images/enceladus.jpg');
-const mimas_texture = textureLoader.load('images/mimas.jpg');
-const asteroid_texture = textureLoader.load('images/asteroid.jpg');
+const bg_texture = new THREE.TextureLoader().load('images/stars_milky_way.jpg');
+const sun_texture = new THREE.TextureLoader().load('images/sunmap.jpg');
+const saturn_texture = new THREE.TextureLoader().load('images/saturnmap.jpg');
+const ring_texture = new THREE.TextureLoader().load("https://i.postimg.cc/zz7Gr430/saturn-rings-top.png");
+const enceladus_texture = new THREE.TextureLoader().load('images/enceladus.jpg');
+const mimas_texture = new THREE.TextureLoader().load('images/mimas.jpg');
+const asteroid_texture = new THREE.TextureLoader().load('images/asteroid.jpg');
 
 
 //sunlight
@@ -58,16 +58,24 @@ const saturn_sphere = new THREE.Mesh(saturn_geometry, saturn_material);
 scene.add(saturn_sphere);
 
 //ring
-const ring_geometry = new THREE.RingGeometry(32, 23, 100);
-const ring_material = new THREE.MeshStandardMaterial({
+const ring_geometry  = new THREE.RingGeometry(23, 32, 100); 
+const pos = ring_geometry .attributes.position;
+const v3 = new THREE.Vector3();
+
+for (let i = 0; i < pos.count; i++) {
+  v3.fromBufferAttribute(pos, i);
+  ring_geometry .attributes.uv.setXY(i, v3.length() < 25 ? 0 : 1, 1); // Adjust UV condition
+}
+
+const ring_material = new THREE.MeshBasicMaterial({
   map: ring_texture,
-  normalMap: ring_normal_map,
-  roughness: 0.6,
-  metalness: 0.1,
+  color: 0xffffff,
+  side: THREE.DoubleSide,
   transparent: true,
-  opacity: 0.8,
+  opacity: 0.8
 });
-const ring = new THREE.Mesh(ring_geometry, ring_material);
+
+const ring= new THREE.Mesh(ring_geometry, ring_material);
 scene.add(ring);
 
 //ring and saturn position
@@ -95,7 +103,7 @@ scene.add(mimas);
 
 
 //random asteroids
-const numAsteroids = 10; //number of asteroids
+const numAsteroids = 5; //number of asteroids
 const asteroids = [];
 const asteroidMovements = [];
 
@@ -153,6 +161,7 @@ let mimasAngle = Math.PI / 2;
 
 function animate() {
   requestAnimationFrame(animate);
+  controls.update()
 
   const enceladusX = Math.cos(enceladusAngle) * enceladusOrbitRadius;
   const enceladusY = Math.sin(enceladusAngle) * enceladusOrbitRadius;
@@ -170,6 +179,7 @@ function animate() {
   saturn_sphere.rotation.y += 0.01;
   enceladus.rotation.y += 0.1;
   mimas.rotation.y += 0.1;
+  ring.rotation.z +=1;
 
 
   asteroids.forEach((asteroid, index) => {
@@ -179,8 +189,8 @@ function animate() {
     asteroid.position.z += asteroidMovements[index].z;
 
     // Ensure asteroids stay within a reasonable range
-    const maxPosition = 40;
-    const minPosition = -40;
+    const maxPosition = 100;
+    const minPosition = -100;
 
     if (asteroid.position.x > maxPosition || asteroid.position.x < minPosition) {
       asteroidMovements[index].x *= -1;
@@ -195,5 +205,4 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
 animate();
