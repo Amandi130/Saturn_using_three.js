@@ -1,10 +1,8 @@
 # Saturn_using_three.js
 
-![saturn_new](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/5e366251-7e67-4499-be8c-b2b49eed5047)
+![image_1](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/4e0fc513-e2ae-4f7b-bee9-1ce71d9214d8)
 
-
-![saturn_new2](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/3774d466-c938-4fc3-82b2-24b61de024e4)
-
+![image_2](https://github.com/Amandi130/Saturn_using_three.js/assets/93074050/5a30e9bb-ce41-41fd-8892-e17538383392)
 
 
 # three.js
