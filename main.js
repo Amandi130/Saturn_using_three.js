@@ -25,8 +25,10 @@ controls.dampingFactor = 0.05;
 const textureLoader = new THREE.TextureLoader();
 
 const bg_texture = new THREE.TextureLoader().load('images/stars_milky_way.jpg');
-const sun_texture = new THREE.TextureLoader().load('images/sunmap.jpg');
+const sun_texture = new THREE.TextureLoader().load('images/sun.jpg');
+const sun_bump = new THREE.TextureLoader().load('images/sunmap.jpg');
 const saturn_texture = new THREE.TextureLoader().load('images/saturnmap.jpg');
+const bump_texture = new THREE.TextureLoader().load('images/bump_map.jpeg');
 const ring_texture = new THREE.TextureLoader().load("images/saturn-rings-top.png");
 const enceladus_texture = new THREE.TextureLoader().load('images/enceladus.jpg');
 const mimas_texture = new THREE.TextureLoader().load('images/mimas.jpg');
@@ -45,14 +47,14 @@ scene.add(bg_sphere);
 
 // sun
 const sun_geometry = new THREE.SphereGeometry(5, 32, 32);
-const sun_material = new THREE.MeshBasicMaterial({ map:sun_texture });
+const sun_material = new THREE.MeshBasicMaterial({ map:sun_texture,  bumpMap:sun_bump, bumpScale:0.1 });
 const sun = new THREE.Mesh(sun_geometry, sun_material);
 sun.position.copy(sunlight.position);
 scene.add(sun);
 
 // saturn
 const saturn_geometry = new THREE.SphereGeometry(15, 32, 100);
-const saturn_material = new THREE.MeshStandardMaterial({ map: saturn_texture});
+const saturn_material = new THREE.MeshStandardMaterial({ map: saturn_texture, bumpMap:bump_texture, bumpScale:0.1});
 const saturn_sphere = new THREE.Mesh(saturn_geometry, saturn_material);
 scene.add(saturn_sphere);
 
@@ -87,15 +89,15 @@ saturn_sphere.position.y = 6;
 ring.rotation.x = Math.PI / 2;
 
 // enceladus moon
-const enceladus_geometry = new THREE.SphereGeometry(1, 32, 32);
-const enceladus_material = new THREE.MeshLambertMaterial({ map: enceladus_texture });
+const enceladus_geometry = new THREE.SphereGeometry(2, 32, 32);
+const enceladus_material = new THREE.MeshLambertMaterial({ map: enceladus_texture, bumpMap:bump_texture, bumpScale:0.1 });
 const enceladus = new THREE.Mesh(enceladus_geometry, enceladus_material);
 const enceladusOrbitRadius = 25;
 scene.add(enceladus);
 
 // mimas moon
-const mimas_geometry = new THREE.SphereGeometry(1, 32, 32);
-const mimas_material = new THREE.MeshLambertMaterial({ map: mimas_texture });
+const mimas_geometry = new THREE.SphereGeometry(2, 32, 32);
+const mimas_material = new THREE.MeshLambertMaterial({ map: mimas_texture, bumpMap:bump_texture, bumpScale:0.1 });
 const mimas = new THREE.Mesh(mimas_geometry, mimas_material);
 const mimasOrbitRadius = 20;
 scene.add(mimas);
@@ -192,16 +194,18 @@ let mimasAngle = Math.PI / 2;
 
 //spaceship
 var loader = new GLTFLoader();
+var spaceship;
 loader.load(
     './Intergalactic_Spaceships_Version_2/GLTF_SEPARATE/Intergalactic_Spaceships_Version_2.gltf',
     function (gltf) {
 
       var scaleFactor = 0.5; // Adjust this value to decrease the size
       gltf.scene.scale.set(scaleFactor, scaleFactor, scaleFactor);
-      scene.add(gltf.scene);
-      gltf.scene.position.set(10,20,40);
-      gltf.scene.rotation.set(0, Math.PI / 2, 0);
-      gltf.scene.castShadow = true;
+      spaceship=gltf.scene;
+      scene.add(spaceship);
+      spaceship.position.set(10,20,40);
+      spaceship.rotation.set(0, Math.PI / 2, 0);
+      spaceship.castShadow = true;
     },
     function (xhr) {
         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
